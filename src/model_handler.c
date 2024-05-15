@@ -8,6 +8,13 @@
 #include <bluetooth/mesh/models.h>
 #include <dk_buttons_and_leds.h>
 #include "model_handler.h"
+#include "prov_helper_srv.h"
+#include "prov_helper_cli.h"
+#include "provisioner_stage.h"
+
+#define LOG_LEVEL LOG_LEVEL_DBG
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(model_handler);
 
 static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
 		    const struct bt_mesh_onoff_set *set,
@@ -178,14 +185,31 @@ static struct bt_mesh_health_srv health_srv = {
 
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
 
+
+const struct bt_mesh_time_srv_handlers srv_helper_handlers = {
+	.prov_helper_message_appkey = provisioner_configure_cdb_with_app_key,
+	.prov_helper_message_netkey = provisioner_create_cdb_with_net_key,
+	.prov_helper_message_nodeinfo = NULL,
+	.prov_helper_message_addrinfo = provisioner_process_provisioning_address_range,
+};
+
+struct bt_mesh_prov_helper_srv helper_srv = BT_MESH_PROV_HELPER_SRV_INIT(&srv_helper_handlers);
+struct bt_mesh_prov_helper_cli helper_cli = BT_MESH_PROV_HELPER_CLI_INIT();
+
+static struct bt_mesh_cfg_cli cfg_cli = {
+};
+
+
 static struct bt_mesh_elem elements[] = {
 #if DT_NODE_EXISTS(DT_ALIAS(led0))
 	BT_MESH_ELEM(
 		1, BT_MESH_MODEL_LIST(
 			BT_MESH_MODEL_CFG_SRV,
+			BT_MESH_MODEL_CFG_CLI(&cfg_cli),
 			BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
 			BT_MESH_MODEL_ONOFF_SRV(&led_ctx[0].srv)),
-		BT_MESH_MODEL_NONE),
+		BT_MESH_MODEL_LIST(BT_MESH_MODEL_PROV_HELPER_SRV(&helper_srv),
+						   BT_MESH_MODEL_PROV_HELPER_CLI(&helper_cli))),
 #endif
 #if DT_NODE_EXISTS(DT_ALIAS(led1))
 	BT_MESH_ELEM(
@@ -217,6 +241,8 @@ const struct bt_mesh_comp *model_handler_init(void)
 	for (int i = 0; i < ARRAY_SIZE(led_ctx); ++i) {
 		k_work_init_delayable(&led_ctx[i].work, led_work);
 	}
+
+	provisioner_stage_init(&elements[0].vnd_models[1]);
 
 	return &comp;
 }

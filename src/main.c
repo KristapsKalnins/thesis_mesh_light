@@ -8,11 +8,22 @@
  *  @brief Nordic mesh light sample
  */
 #include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/mesh.h>
 #include <bluetooth/mesh/models.h>
 #include <bluetooth/mesh/dk_prov.h>
 #include <dk_buttons_and_leds.h>
 #include "model_handler.h"
+#include "provisioner_stage.h"
 #include "smp_bt.h"
+
+
+static const uint8_t dev_uuid[16] = { 0xdd, 0xdd, 0xab, 0xac, 0xca, 0xde };
+
+static const struct bt_mesh_prov prov = {
+	.uuid = dev_uuid,
+	.unprovisioned_beacon = provisioner_unprovisioned_beacon_callback,
+	.node_added = provisioner_node_added_callback,
+};
 
 static void bt_ready(int err)
 {
@@ -26,7 +37,7 @@ static void bt_ready(int err)
 	dk_leds_init();
 	dk_buttons_init(NULL);
 
-	err = bt_mesh_init(bt_mesh_dk_prov_init(), model_handler_init());
+	err = bt_mesh_init(&prov, model_handler_init());
 	if (err) {
 		printk("Initializing mesh failed (err %d)\n", err);
 		return;
@@ -59,6 +70,8 @@ int main(void)
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
 	}
+
+	provisioner_search_for_unprovisioned_devices();
 
 	return 0;
 }

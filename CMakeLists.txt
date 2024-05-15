@@ -15,11 +15,25 @@ include_directories(
 # NORDIC SDK APP START
 target_sources(app PRIVATE
 	src/main.c
-	src/model_handler.c)
+	src/model_handler.c
+	src/lib/model/prov_helper_srv.c
+	src/lib/model/prov_helper_cli.c
+	src/lib/prov_stage/provisioner_stage.c)
 target_include_directories(app PRIVATE
 	include
 	${ZEPHYR_NRF_MODULE_DIR}/samples/bluetooth/mesh/common
 )
+
+target_include_directories(app PRIVATE
+	include
+	src/lib/model
+)
+
+target_include_directories(app PRIVATE
+	include
+	src/lib/prov_stage
+)
+
 
 # Preinitialization related to DFU over SMP for nRF52 series
 if(CONFIG_SOC_SERIES_NRF52X)
