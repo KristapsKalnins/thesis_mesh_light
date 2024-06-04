@@ -12,18 +12,42 @@
 #include <bluetooth/mesh/models.h>
 #include <bluetooth/mesh/dk_prov.h>
 #include <dk_buttons_and_leds.h>
+#include <zephyr/drivers/hwinfo.h>
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/usb/usbd.h>
 #include "model_handler.h"
 #include "provisioner_stage.h"
 #include "smp_bt.h"
 
 
-static const uint8_t dev_uuid[16] = { 0xdd, 0xdd, 0xab, 0xac, 0xca, 0xde };
+static uint8_t dev_uuid[16] = { 0 };
 
 static const struct bt_mesh_prov prov = {
 	.uuid = dev_uuid,
 	.unprovisioned_beacon = provisioner_unprovisioned_beacon_callback,
 	.node_added = provisioner_node_added_callback,
+	.oob_info = BT_MESH_PROV_OOB_CERTIFICATE | BT_MESH_PROV_OOB_RECORDS,
+	.static_val = "testtesttesttes",
+	.static_val_len = 15,
 };
+
+
+void bt_set_unique_uuid(){
+	size_t id_len = hwinfo_get_device_id(dev_uuid, sizeof(dev_uuid));
+
+	if (!IS_ENABLED(CONFIG_BT_MESH_DK_LEGACY_UUID_GEN)) {
+		/* If device ID is shorter than UUID size, fill rest of buffer with
+		 * inverted device ID.
+		 */
+		for (size_t i = id_len; i < sizeof(dev_uuid); i++) {
+			dev_uuid[i] = dev_uuid[i % id_len] ^ 0xff;
+		}
+	}
+
+	dev_uuid[6] = (dev_uuid[6] & BIT_MASK(4)) | BIT(6);
+	dev_uuid[8] = (dev_uuid[8] & BIT_MASK(6)) | BIT(7);
+}
+
 
 static void bt_ready(int err)
 {
@@ -36,6 +60,8 @@ static void bt_ready(int err)
 
 	dk_leds_init();
 	dk_buttons_init(NULL);
+
+	bt_set_unique_uuid();
 
 	err = bt_mesh_init(&prov, model_handler_init());
 	if (err) {
@@ -65,7 +91,9 @@ int main(void)
 	int err;
 
 	printk("Initializing...\n");
-
+#if defined(CONFIG_USB_DEVICE_STACK)
+	err = usb_enable(NULL);
+#endif
 	err = bt_enable(bt_ready);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
