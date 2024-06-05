@@ -74,7 +74,7 @@ static void bt_ready(int err)
 	}
 
 	/* This will be a no-op if settings_load() loaded provisioning info */
-	bt_mesh_prov_enable(BT_MESH_PROV_ADV | BT_MESH_PROV_GATT);
+	bt_mesh_prov_enable(BT_MESH_PROV_ADV | BT_MESH_PROV_GATT | BT_MESH_PROV_REMOTE);
 
 	printk("Mesh initialized\n");
 
@@ -91,9 +91,7 @@ int main(void)
 	int err;
 
 	printk("Initializing...\n");
-#if defined(CONFIG_USB_DEVICE_STACK)
-	err = usb_enable(NULL);
-#endif
+
 	err = bt_enable(bt_ready);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);

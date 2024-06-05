@@ -207,7 +207,8 @@ static struct bt_mesh_elem elements[] = {
 			BT_MESH_MODEL_CFG_SRV,
 			BT_MESH_MODEL_CFG_CLI(&cfg_cli),
 			BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-			BT_MESH_MODEL_ONOFF_SRV(&led_ctx[0].srv)),
+			BT_MESH_MODEL_ONOFF_SRV(&led_ctx[0].srv),
+			BT_MESH_MODEL_RPR_SRV),
 		BT_MESH_MODEL_LIST(BT_MESH_MODEL_PROV_HELPER_SRV(&helper_srv),
 						   BT_MESH_MODEL_PROV_HELPER_CLI(&helper_cli))),
 #endif
