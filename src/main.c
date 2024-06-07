@@ -91,6 +91,16 @@ int main(void)
 	int err;
 
 	printk("Initializing...\n");
+	const struct device *dev;
+	int ret;
+
+	dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
+	if (!device_is_ready(dev)) {
+		printk("CDC ACM device not ready\n");
+		return 0;
+	}
+
+	ret = usb_enable(NULL);
 
 	err = bt_enable(bt_ready);
 	if (err) {
