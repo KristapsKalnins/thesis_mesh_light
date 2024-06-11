@@ -7,6 +7,7 @@
 #include <zephyr/bluetooth/bluetooth.h>
 #include <bluetooth/mesh/models.h>
 #include <dk_buttons_and_leds.h>
+#include <zephyr/sys/reboot.h>
 #include "model_handler.h"
 #include "prov_helper_srv.h"
 #include "prov_helper_cli.h"
@@ -78,6 +79,12 @@ static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
 {
 	struct led_ctx *led = CONTAINER_OF(srv, struct led_ctx, srv);
 	int led_idx = led - &led_ctx[0];
+	
+	if(led_idx == 0){
+		k_sleep(K_SECONDS(1));
+		sys_reboot(SYS_REBOOT_COLD);
+	}
+
 
 	if (set->on_off == led->value) {
 		goto respond;
