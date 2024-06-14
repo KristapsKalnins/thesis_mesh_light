@@ -93,7 +93,7 @@ int main(void)
 	printk("Initializing...\n");
 	const struct device *dev;
 	int ret;
-
+#if DT_NODE_EXISTS(DT_ALIAS(zephyr_cdc_acm_uart))
 	dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
 	if (!device_is_ready(dev)) {
 		printk("CDC ACM device not ready\n");
@@ -101,7 +101,7 @@ int main(void)
 	}
 
 	ret = usb_enable(NULL);
-
+#endif
 	err = bt_enable(bt_ready);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
