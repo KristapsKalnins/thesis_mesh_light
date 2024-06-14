@@ -93,7 +93,7 @@ int main(void)
 	printk("Initializing...\n");
 	const struct device *dev;
 	int ret;
-#if DT_NODE_EXISTS(DT_ALIAS(zephyr_cdc_acm_uart))
+#ifdef CONFIG_BOARD_NRF52840DONGLE_NRF52840
 	dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
 	if (!device_is_ready(dev)) {
 		printk("CDC ACM device not ready\n");
