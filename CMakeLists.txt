@@ -12,6 +12,8 @@ include_directories(
 	${ZEPHYR_NRF_MODULE_DIR}/samples/bluetooth/mesh/common
 )
 
+zephyr_include_directories(${ZEPHYR_BASE}/subsys/bluetooth/mesh)
+
 # NORDIC SDK APP START
 target_sources(app PRIVATE
 	src/main.c

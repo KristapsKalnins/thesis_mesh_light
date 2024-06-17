@@ -193,7 +193,7 @@ static struct bt_mesh_health_srv health_srv = {
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
 
 
-const struct bt_mesh_time_srv_handlers srv_helper_handlers = {
+const struct bt_mesh_prov_helper_srv_handlers srv_helper_handlers = {
 	.prov_helper_message_appkey = provisioner_configure_cdb_with_app_key,
 	.prov_helper_message_netkey = provisioner_create_cdb_with_net_key,
 	.prov_helper_message_nodeinfo = NULL,
